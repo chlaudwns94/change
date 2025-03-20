@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korit.mcdonaldkiosk.mapper.AdminMapper">
+
+    <resultMap id="adminResultMap" type="com.korit.mcdonaldkiosk.entity.Admin">
+        <id property="adminId" column="admin_id" />
+        <result property="adminName" column="admin_name" />
+        <result property="adminPassword" column="admin_password" />
+        <result property="email" column="email" />
+        <result property="tradeName" column="trade_name" />
+        <result property="accountEnabled" column="account_enabled"/>
+        <result property="createDate" column="create_date" />
+        <result property="updateDate" column="update_date" />
+        <collection property="oAuth2s" resultMap="oAuth2ResultMap" />
+    </resultMap>
+    <resultMap id="oAuth2ResultMap" type="com.korit.mcdonaldkiosk.entity.OAuth2">
+        <id property="oAuth2Id" column="oauth_id" />
+        <result property="oAuth2Name" column="oauth2_name" />
+        <result property="adminId" column="at_admin_id" />
+        <result property="providerName" column="provider_name" />
+        <result property="createDate" column="create_date" />
+        <result property="updateDate" column="update_date" />
+    </resultMap>
+
+    <insert id="insertAdmin" keyProperty="adminId" useGeneratedKeys="true">
+        insert into admin_tb
+        values(default, #{adminName},#{adminPassword},#{email},#{tradeName},now(),now())
+    </insert>
+
+    <insert id="saveOAuth2">
+        insert into
+            oauth2_tb
+        values(default, #{oAuth2Name}, #{adminId}, #{providerName}, now(), now())
+    </insert>
+
+    <update id="updatePasswordById">
+        update admin_tb
+        set
+            admin_password = #{adminPassword}
+        where
+            admin_id = #{adminId}
+    </update>
+
+    <update id="updateEmailById">
+        update admin_tb
+        set
+            email = #{email}
+        where
+            admin_id = #{adminId}
+    </update>
+
+    <update id="updateAccountEnabledByAdminName">
+        update admin_tb
+        set
+            account_enabled = 1
+        where
+            admin_name = #{adminName}
+    </update>
+
+    <update id="updateTradeNameById">
+        update admin_tb
+        set
+            trade_name = #{tradeName}
+        where
+            admin_id = #{adminId}
+    </update>
+
+    <select id="selectByAdminName" resultMap="adminResultMap">
+        select
+            admin_id,
+            admin_name,
+            admin_password,
+            email,
+            trade_name,
+            create_date,
+            update_date
+        from
+            admin_tb
+        where
+            admin_name = #{adminName}
+    </select>
+
+    <select id="selectByAdminId" resultMap="adminResultMap">
+        select
+            admin_id,
+            admin_name,
+            admin_password,
+            email,
+            trade_name,
+            create_date,
+            create_date
+        from
+            admin_tb
+        where
+            admin_id = #{adminId}
+    </select>
+
+    <select id="findAdminByOAuth2name" resultType="com.korit.mcdonaldkiosk.entity.Admin">
+        select
+            at.admin_id,
+            at.admin_name,
+            at.admin_password,
+            at.trade_name,
+            at.email,
+            at.create_date,
+            at.update_date,
+            oat.oauth2_id,
+            oat.oauth2_name,
+            oat.provider_name
+        from
+            admin_tb at
+            left outer join oauth2_tb oat on(oat.admin_id = at.admin_id)
+        where
+        oat.oauth2_name = #{oAuth2Name}
+    </select>
+
+</mapper>

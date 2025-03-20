@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korit.mcdonaldkiosk.mapper.AdminMenuMapper">
+
+    <resultMap id="menuResultMap" type="com.korit.mcdonaldkiosk.entity.Menu">
+        <id property="menuId" column="menu_id" />
+        <result property="menuName" column="menu_name" />
+        <result property="menuCategory" column="menu_category" />
+        <result property="menuSequence" column="menu_sequence" />
+        <result property="singleImg" column="single_img" />
+        <result property="setImg" column="set_img" />
+        <result property="isExposure" column="is_exposure" />
+
+        <collection property="menuPrice" resultMap="menuPriceResultMap"/>
+    </resultMap>
+
+    <resultMap id="menuPriceResultMap" type="com.korit.mcdonaldkiosk.entity.MenuPrice">
+        <id property="menuPriceId" column="menu_price_id" />
+        <result property="menuId" column="mt_menu_id" />
+        <result property="size" column="size" />
+        <result property="menuPrice" column="menu_price" />
+        <result property="discountPrice" column="discount_price" />
+    </resultMap>
+
+
+    <!--카테고리만 불러오기-->
+    <select id="selectAllCategories" resultMap="menuResultMap">
+        SELECT
+            menu_category
+        FROM
+            menu_tb mt
+        group by
+            menu_category
+    </select>
+
+    <!--모든 메뉴 불러오기-->
+    <select id="selectAllAdminMenus" resultMap="menuResultMap">
+        SELECT
+            mt.menu_id,
+            mt.menu_name,
+            mt.menu_category,
+            mpt.menu_price,
+            mt.is_exposure
+        FROM
+            menu_tb mt
+            LEFT OUTER JOIN menu_price_tb mpt ON mt.menu_id = mpt.menu_id
+    </select>
+
+    <!--리스트 갯수 불러오기-->
+    <select id="selectMenuCountAllByCategory" resultType="java.lang.Integer">
+        select
+            count(*)
+        from
+            menu_tb
+        <where>
+            <if test="searchCategory != null and searchCategory != '' and searchCategory != '전체'">
+                menu_category = #{searchCategory}
+            </if>
+        </where>
+    </select>
+
+    <!--카테고리에 해당하는 메뉴 불러오기-->
+    <select id="selectMenuListByCategory" resultMap="menuResultMap">
+        SELECT
+            mt.menu_id,
+            mt.menu_name,
+            mt.menu_category,
+            mpt.menu_price,
+            mt.is_exposure
+        FROM
+            menu_tb mt
+            LEFT OUTER JOIN menu_price_tb mpt ON mt.menu_id = mpt.menu_id
+        <where>
+            <if test="category != null and category != '' and category != '전체'">
+                menu_category = #{category}
+            </if>
+        </where>
+    </select>
+
+    <!-- 전체 메뉴 조회 -->
+    <select id="selectAllMenus" resultMap="menuResultMap">
+        SELECT
+            m.menu_id,
+            m.menu_name,
+            m.menu_category,
+            m.menu_sequence,
+            m.single_img,
+            m.set_img,
+            m.is_exposure,
+
+            mp.menu_price_id,
+            mp.menu_id,
+            mp.size,
+            mp.menu_price,
+            mp.discount_price
+        FROM
+            menu_tb m
+            LEFT OUTER JOIN menu_price_tb mp ON m.menu_id = mp.menu_id
+    </select>
+
+    <!-- 특정 메뉴 가격 조회 -->
+    <select id="getMenuPrices" resultType="com.korit.mcdonaldkiosk.entity.MenuPrice">
+        SELECT * FROM menu_price_tb WHERE menu_id = #{menuId}
+    </select>
+
+    <!-- 메뉴 추가 -->
+    <insert id="insertMenu" useGeneratedKeys="true" keyProperty="menuId">
+        INSERT INTO
+            menu_tb (
+            menu_name,
+            menu_category,
+            menu_sequence,
+            single_img,
+            set_img,
+            is_exposure
+        ) VALUES (
+            #{menuName},
+            #{menuCategory},
+            #{menuSequence},
+            #{singleImg},
+            #{setImg},
+            #{isExposure}
+        );
+    </insert>
+
+    <!-- 가격 추가 -->
+    <insert id="insertMenuPrices">
+        INSERT INTO menu_price_tb (menu_id, size, menu_price, discount_price)
+        VALUES
+        <foreach collection="menuPrices" item="price" separator=",">
+            (#{menuId}, #{price.size}, #{price.menuPrice}, #{price.discountPrice})
+        </foreach>
+    </insert>
+
+    <!-- 가격 삭제 -->
+    <delete id="deleteMenuPrices">
+        DELETE FROM menu_price_tb WHERE menu_id = #{menuId}
+    </delete>
+
+    <!-- 메뉴 삭제 -->
+    <delete id="deleteMenu">
+        DELETE FROM menu_tb WHERE menu_id = #{menuId}
+    </delete>
+</mapper>

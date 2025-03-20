@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korit.mcdonaldkiosk.mapper.OrderMapper">
+
+    <!-- 주문 리스트를 추가하는 쿼리 -->
+    <insert id="addOrderList"
+            useGeneratedKeys="true"
+            keyProperty="orderId"
+            parameterType="com.korit.mcdonaldkiosk.entity.Order">
+        insert into order_tb
+        values (default,now(), 0)
+    </insert>
+
+    <update id="updateTotalSales">
+        UPDATE order_tb
+        SET total_sales =
+        (
+        SELECT SUM(menu_price)
+
+        FROM order_detail_tb
+        WHERE order_id = #{orderId}
+        )
+        WHERE order_id = #{orderId}
+    </update>
+
+    <insert id="addOrders">
+        insert into order_detail_tb (order_id, menu_price_id, menu_count, is_set, menu_price)
+        values
+        <foreach collection="orders" item="order" separator=",">
+            (
+                #{order.orderId},
+                #{order.menuPriceId},
+                #{order.menuCount},
+                #{order.isSet},
+            CASE
+                WHEN #{order.isSet} = 0 THEN #{order.menuPrice} * #{order.menuCount}
+                WHEN #{order.isSet} = 1 THEN #{order.discountPrice} * #{order.menuCount}
+            ELSE 0
+            END
+            )
+        </foreach>
+    </insert>
+
+
+</mapper>

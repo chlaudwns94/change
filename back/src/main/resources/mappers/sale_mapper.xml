@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.korit.mcdonaldkiosk.mapper.SalesMapper">
+
+    <resultMap id="SalesResultMap" type="com.korit.mcdonaldkiosk.entity.Sales">
+        <result property="year" column="year" />
+        <result property="month" column="month" />
+        <result property="orderId" column="order_id" />
+        <result property="orderCount" column="total_orders" />
+        <result property="totalSales" column="total_sales" />
+    </resultMap>
+
+    <resultMap id="MenuSalesResultMap" type="com.korit.mcdonaldkiosk.entity.MenuSales">
+        <id property="menuSalesId" column="menu_sales_id" />
+        <result property="menuId" column="menu_id" />
+        <result property="orderYear" column="order_year" />
+        <result property="orderMonth" column="order_month" />
+        <result property="totalCount" column="total_count" />
+        <result property="sales" column="sales" />
+    </resultMap>
+
+
+    <select id="getSales" resultMap="SalesResultMap">
+        SELECT
+            year,
+            month,
+            order_id,
+            total_orders,
+            total_sales
+        FROM
+            sales_tb
+        WHERE
+            year = #{year}
+        ORDER BY
+            month;
+    </select>
+
+    <select id="findSales" resultMap="MenuSalesResultMap">
+        SELECT
+            ott.menu_id,
+            ott.order_year,
+            ott.order_month,
+            SUM(ott.menu_count) AS total_count,
+            SUM(ott.menu_count * mpt.menu_price) AS sales
+        FROM
+            (SELECT
+            DATE_FORMAT(order_time, "%Y") AS order_year,
+            DATE_FORMAT(order_time, "%m") AS order_month,
+            menu_id,
+            menu_count
+        FROM
+            order_tb ot
+            LEFT OUTER JOIN order_detail_tb olt ON olt.order_id = ot.order_id) ott
+            LEFT OUTER JOIN menu_tb mt ON mt.menu_id = ott.menu_id
+            LEFT OUTER JOIN menu_price_tb mpt ON mpt.menu_id = mt.menu_id
+        GROUP BY
+            ott.order_year,
+            ott.order_month,
+            ott.menu_id
+        ORDER BY
+            ott.order_year,
+            ott.order_month;
+    </select>
+</mapper>

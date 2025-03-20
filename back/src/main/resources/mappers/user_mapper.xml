@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korit.mcdonaldkiosk.mapper.UserMapper">
+
+    <resultMap id="userResultMap" type="com.korit.mcdonaldkiosk.entity.User">
+        <id property="userId" column="user_id" />
+        <result property="phoneNumber" column="phone_number" />
+        <result property="createdDate" column="create_date" />
+        <result property="updatedDate" column="update_date" />
+
+    </resultMap>
+
+    <insert id="insertUser">
+        insert into user_tb
+        values(default, #{phoneNumber}, now(),now())
+    </insert>
+
+    <select id="findUserByPhoneNumber" resultMap="userResultMap">
+        select
+            user_id,
+            phone_number,
+            create_date,
+            update_date
+        from
+            user_tb
+        where
+            phone_number=#{phoneNumber}
+    </select>
+</mapper>

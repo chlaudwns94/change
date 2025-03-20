@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.korit.mcdonaldkiosk.mapper.PointMapper">
+
+    <resultMap id="pointResultMap" type="com.korit.mcdonaldkiosk.entity.Point">
+        <id property="pointId" column="point_id" />
+        <result property="userId" column="user_id" />
+        <result property="calcul" column="calcul" />
+        <result property="point" column="point" />
+    </resultMap>
+    <resultMap id="userResultMap" type="com.korit.mcdonaldkiosk.entity.User">
+        <id property="userId" column="user_id"/>
+        <result property="phoneNumber" column="phone_number"/>
+        <result property="createDate" column="create_date"/>
+        <result property="updateDate" column="update_date"/>
+    </resultMap>
+
+    <!-- 핸드폰 번호로 유저 ID 조회 -->
+    <select id="findUserIdByPhoneNumber" resultType="java.lang.Integer">
+        SELECT user_id FROM user_tb WHERE phone_number = #{phoneNumber}
+    </select>
+
+    <!-- 포인트 적립 -->
+    <insert id="insertPoint">
+        INSERT INTO point_tb (user_id, calcul, point)
+        VALUES (#{userId}, #{calcul}, #{point})
+    </insert>
+
+    <select id="findCurrentPointByUserId" resultType="com.korit.mcdonaldkiosk.entity.Point">
+        SELECT
+            point
+        FROM
+            point_tb
+        WHERE user_id = #{userId}
+    </select>
+
+    <!-- 포인트 차감 -->
+    <update id="updatePoint">
+        UPDATE point_tb
+        SET point = #{point}
+        WHERE user_id = #{userId} AND point >= 0
+    </update>
+
+
+
+    <!-- 새로운 유저 생성 (user_tb에 저장) -->
+    <insert id="createNewUser">
+        INSERT INTO user_tb (phone_number, create_date, update_date)
+        VALUES (#{phoneNumber}, NOW(), NOW())
+    </insert>
+
+</mapper>

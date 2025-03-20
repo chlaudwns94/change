@@ -1,0 +1,86 @@
+useQuery 훅 함수
+: useQuery는 GET 요청(데이터 조회)할 때 사용
+
+    data: 서버에서 가져온 데이터 (비동기적으로 로드되므로, 처음에는 undefined일 수 있음).
+    error: 데이터 fetch 중 에러가 발생했을 경우의 에러 정보.
+    isLoading: 데이터가 로드 중일 때 true로 설정.
+    isSuccess: 데이터가 정상적으로 로드되었을 때 true로 설정.
+    isFetching: 쿼리가 현재 실행 중인지 여부를 나타내는 값.
+    refetch: 쿼리를 강제로 다시 실행시킬 수 있는 함수.
+
+
+useQuery의 여러 옵션
+
+
+
+enabled: 이 값이 false로 설정되면, 쿼리는 자동으로 실행되지 않음. 쿼리를 수동으로 실행하고자 할 때 유용.
+
+    const { data } = useQuery('data', fetchData, { enabled: false });
+
+
+
+staleTime: 데이터가 "낡은" 것으로 간주되기까지의 시간을 설정. 기본값은 0으로, 쿼리가 fetch된 후 즉시 데이터를 새로 고침합니다.
+
+    const { data } = useQuery('data', fetchData, { staleTime: 60000 }); // 1분 동안 캐시된 데이터 사용
+
+
+cacheTime: 캐시된 데이터가 자동으로 삭제되기 전까지의 시간을 설정. 기본값은 5분입니다.
+
+    const { data } = useQuery('data', fetchData, { cacheTime: 300000 }); // 5분 동안 캐시 데이터 유지
+
+
+refetchInterval: 데이터를 주기적으로 다시 가져오도록 설정하는 옵션입니다. 이 값은 밀리초로 설정됩니다.
+
+    const { data } = useQuery('data', fetchData, { refetchInterval: 10000 }); // 10초마다 refetch
+
+
+onSuccess 및 onError: 쿼리 성공 시나 에러 발생 시 콜백을 처리할 수 있는 옵션입니다.
+
+    const { data } = useQuery('data', fetchData, {
+    onSuccess: (data) => {
+        console.log('Data fetched successfully', data);
+    },
+    onError: (error) => {
+        console.error('Error fetching data', error);
+    }
+    });
+
+
+
+useQuery와 함께 쓸 수 있는 함수들
+
+
+refetch(): 쿼리 결과를 다시 가져오고 싶을 때 사용할 수 있습니다. 예를 들어, 사용자가 버튼을 눌러서 데이터를 새로고침할 때 유용합니다.
+
+    const { data, refetch } = useQuery('posts', fetchPosts);
+    # refetch()를 호출하여 쿼리 다시 실행
+    <button onClick={() => refetch()}>새로 고침</button>;
+
+
+invalidateQueries(): 쿼리 데이터를 강제로 무효화시켜서 다음에 해당 쿼리를 실행할 때 데이터를 새로 불러오도록 할 수 있습니다. 주로 데이터를 수정한 후, 변경된 데이터를 반영할 때 사용됩니다.
+
+    const queryClient = useQueryClient();
+    queryClient.invalidateQueries('posts');
+
+
+useMutation(): 데이터를 수정하거나, 삭제하는 등의 액션을 처리할 때는 useMutation을 사용합니다. useQuery는 데이터를 가져오는 용도에만 사용되고, useMutation은 데이터의 생성, 수정, 삭제 작업을 처리합니다.
+
+    import { useMutation } from '@tanstack/react-query';
+
+    const mutation = useMutation(createPost, {
+    onSuccess: () => {
+        queryClient.invalidateQueries('posts');
+    }
+    });
+
+    const handleCreatePost = () => {
+    mutation.mutate({ title: '새로운 게시글' });
+    };
+
+
+
+
+
+useMutation 훅 함수
+
+캐싱 설정
