@@ -9,6 +9,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * 사용자 포인트 관련 데이터를 처리하는 컨트롤러
+ *
+ * - 사용자가 포인트를 적립하거나 차감할 수 있는 API를 제공한다.
+ */
 @RestController
 @RequestMapping("/api/user")
 public class PointController {
@@ -16,6 +21,12 @@ public class PointController {
     @Autowired
     private PointService pointService;
 
+    /**
+     * 포인트 처리 API
+     *
+     * @param reqPointDto 포인트 처리 요청 데이터
+     * @return 포인트 처리 성공 또는 오류 메시지 응답
+     */
     @PostMapping("/processPoint")
     public ResponseEntity<String> processPoint(@RequestBody ReqPointDto reqPointDto) {
         try {

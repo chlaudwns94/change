@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+/**
+ * 사용자 메뉴 관련 데이터를 제공하는 컨트롤러
+ *
+ * - 사용자가 메뉴 리스트를 조회할 수 있는 API를 제공한다.
+ */
 @RestController()
 @RequestMapping("/user")
 public class MenuController {
@@ -21,7 +26,11 @@ public class MenuController {
         this.menuService = menuService;
     }
 
-    // 메뉴 리스트 반환
+    /**
+     * 메뉴 리스트 조회 API
+     *
+     * @return 모든 메뉴 리스트 데이터 응답
+     */
     @GetMapping("/menu")
     public ResponseEntity<List<Menu>> getMenus() {
         List<Menu> menus = menuService.getAllMenus();
